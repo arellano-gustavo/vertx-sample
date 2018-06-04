@@ -1,2 +1,10 @@
-gus.rtf
 /target/
+/.settings/
+.project
+.classpath
+.DS_Store
+.idea/
+*.iml
+*.txt
+/log/
+/upload.folder/
