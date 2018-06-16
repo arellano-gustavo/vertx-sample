@@ -1,5 +1,7 @@
 package mx.unam.dgpe.sample.controller;
 
+import static org.junit.Assert.*;
+
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -12,7 +14,10 @@ public class TestMyController extends AbstractVerticle {
     @Test
     public void ok() throws Exception {
         String result = sendGet("https://www.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
+        assertTrue("Este es un mensaje", result.length()>1);
+        assertFalse("Este es un mensaje", result.length()>10000);
         logger.info(result);
+        assertTrue(false);
     }
 
 }
