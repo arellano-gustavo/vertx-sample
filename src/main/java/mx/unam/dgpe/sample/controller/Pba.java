@@ -8,6 +8,10 @@ public class Pba {
     static int lenY = 5;
     Cuadro[][] caja = null;
 
+    /**
+     * Este es un ejemplo de documentación javaDoc
+     * @param args
+     */
     public static void main(String[] args) {
         Pba p = new Pba();
         p.ok2();
