@@ -17,7 +17,6 @@ public class TestMyController extends AbstractVerticle {
         assertTrue("Este es un mensaje", result.length()>1);
         assertFalse("Este es un mensaje", result.length()>10000);
         logger.info(result);
-        assertTrue(false);
     }
 
 }

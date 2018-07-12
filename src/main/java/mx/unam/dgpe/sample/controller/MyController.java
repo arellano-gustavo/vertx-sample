@@ -21,18 +21,13 @@ public class MyController extends AbstractVerticle {
     public void start(Future<Void> fut) {
         logger.info("Inicializando Vertical");
         Router router = Router.router(vertx);
-        //router.route("/*").handler(StaticHandler.create("assets")); 
-        //router.route("/*").handler(StaticHandler.create("assets")); // para invocar asi: http://localhost:8080/index.html
-        // el directorio "upload-folder" será creado en la misma ubicación que el jar fue ejecutado
-        router.route().handler(BodyHandler.create().setUploadsDirectory("upload-folder"));
-        router.get("/api/primero").handler(this::primero);
-        router.post("/api/segundo").handler(this::segundo);
-        router.get("/api/tercero").handler(this::tercero);
-        router.get("/api/cuenta").handler(this::cuenta);
+        router.route().handler(BodyHandler.create());//.setUploadsDirectory("upload-folder"));
+        router.post("/coloca").handler(this::segundo);
+        router.post("/elimina").handler(this::tercero);
         
         // Create the HTTP server and pass the "accept" method to the request handler.
         vertx.createHttpServer().requestHandler(router::accept).listen( 
-                config().getInteger("http.port", 8080), result -> {
+                config().getInteger("http.port", 6060), result -> {
                     logger.info("Hola");
                     if (result.succeeded()) {
                         fut.complete();
@@ -43,6 +38,7 @@ public class MyController extends AbstractVerticle {
         pba = System.getenv("PBA");
         logger.info("Vertical iniciada !!!" + pba);
     }  
+    /*
     private void primero(RoutingContext routingContext) {
         HttpServerResponse response = routingContext.response();
         HttpServerRequest request = routingContext.request();
@@ -86,7 +82,7 @@ public class MyController extends AbstractVerticle {
         else
             info.put("resultado", "Valor inválido");
         return Json.encodePrettily(info);
-    }
+    }*/
     private void segundo(RoutingContext routingContext) {
         HttpServerResponse response = routingContext.response();
         HttpServerRequest request = routingContext.request();
@@ -98,8 +94,19 @@ public class MyController extends AbstractVerticle {
         putHeader("content-type", "application/json; charset=utf-8").
         end(jsonResponse);
     }
-    
     private void tercero(RoutingContext routingContext) {
+        HttpServerResponse response = routingContext.response();
+        HttpServerRequest request = routingContext.request();
+
+        String decoded = routingContext.getBodyAsString();
+        String jsonResponse = procesa(decoded, request);
+        response.
+        setStatusCode(200).
+        putHeader("content-type", "application/json; charset=utf-8").
+        end(jsonResponse);
+    }
+    /*
+    private void tercero2(RoutingContext routingContext) {
         HttpServerResponse response = routingContext.response();
         HttpServerRequest request = routingContext.request();
         String mode = request.getParam("source");
@@ -119,7 +126,7 @@ public class MyController extends AbstractVerticle {
     private boolean calcula(String d) {
         String tmp = d+d;
         return tmp.substring(1, tmp.length()-1).contains(d);
-    }
+    }*/
     private String procesa(String decoded, HttpServerRequest request) {
         Map<String, String> srv = new HashMap<>();
         srv.put("Current Node IP", request.localAddress().host());
