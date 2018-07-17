@@ -32,5 +32,16 @@ public class Operacion {
     public void setAccion(String accion) {
         this.accion = accion;
     }
-    
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(" accion: ");
+        sb.append(this.accion);
+        sb.append(" cantidad: ");
+        sb.append(this.cantidad);
+        sb.append(" valor: ");
+        sb.append(this.valor);
+        sb.append(" sender: ");
+        sb.append(this.sender);
+        return sb.toString();
+    }
 }
