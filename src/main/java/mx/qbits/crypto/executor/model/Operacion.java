@@ -1,4 +1,4 @@
-package mx.qbits.crypto.executor.controller;
+package mx.qbits.crypto.executor.model;
 
 public class Operacion {
     private double valor;

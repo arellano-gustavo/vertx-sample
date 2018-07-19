@@ -3,7 +3,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>mx.unam.dgpe</groupId>
+    <groupId>mx.qbits.crypto</groupId>
     <artifactId>crypto-executor</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
@@ -39,7 +39,7 @@
         </dependency>
         <dependency>
             <groupId>mx.qbits.crypto</groupId>
-            <artifactId>cred-store</artifactId>
+            <artifactId>crypto-cred-store</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

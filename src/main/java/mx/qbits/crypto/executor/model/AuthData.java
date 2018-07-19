@@ -1,6 +1,6 @@
-package mx.qbits.crypto.executor.controller;
+package mx.qbits.crypto.executor.model;
 
-public class Konst {
+public class AuthData {
     public static final String major = "BTC";
     public static final String minor = "USDT";
     public static final String symbol = major+minor;

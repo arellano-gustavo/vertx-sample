@@ -24,6 +24,8 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
+import mx.qbits.crypto.executor.model.AuthData;
+import mx.qbits.crypto.executor.model.Operacion;
 import mx.qbits.crypto.store.Account;
 import mx.qbits.crypto.store.AccountInfoResolver;
 
@@ -62,8 +64,8 @@ public class MainController extends AbstractVerticle {
         
         router.route().handler(BodyHandler.create());          
         
-        router.post("/crypto-trader/bitcoin/coloca").handler(this::doit);
-        router.post("/crypto-trader/bitcoin/elimina").handler(this::doit);
+        router.post("/crypto-trader/bitcoin/coloca").handler(this::processRequest);
+        router.post("/crypto-trader/bitcoin/elimina").handler(this::processRequest);
         
         vertx.createHttpServer().requestHandler(router::accept).listen( 
                 config().getInteger("http.port", port), result -> {
@@ -96,10 +98,11 @@ public class MainController extends AbstractVerticle {
         Account[] accInfo = op.getAccountsInfo(credFile);
         for(Account account : accInfo) {
             if(usr.equals(account.getUser())) {
-                Konst.usr = account.getUser();
-                Konst.key = account.getKey();
-                Konst.secret = account.getSecret();
-                BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(Konst.key, Konst.secret);
+                AuthData.usr = account.getUser();
+                AuthData.key = account.getKey();
+                AuthData.secret = account.getSecret();
+                logger.info("Usuario "+AuthData.usr+" logueado al sistema exitosamente !!!");
+                BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(AuthData.key, AuthData.secret);
                 this.client = factory.newRestClient();
                 return;
             }
@@ -109,10 +112,10 @@ public class MainController extends AbstractVerticle {
         System.exit(1);
     }
     
-    private void doit(RoutingContext routingContext) {
+    private void processRequest(RoutingContext routingContext) {
         HttpServerResponse response = routingContext.response();
         String decoded = routingContext.getBodyAsString();
-        String jsonResponse = procesa(decoded);
+        String jsonResponse = invokeApi(decoded);
         response.
         setStatusCode(200)
         .putHeader("content-type", "application/json; charset=utf-8")
@@ -123,7 +126,7 @@ public class MainController extends AbstractVerticle {
         .end(jsonResponse);
     }
     
-    private String procesa(String decoded) {
+    private String invokeApi(String decoded) {
         Operacion info = null;
         info = Json.decodeValue(decoded, Operacion.class);
         logger.info(info.toString());
@@ -131,17 +134,17 @@ public class MainController extends AbstractVerticle {
         if("compra".equals(info.getAccion())) {
             logger.info("comprando...");
             NewOrderResponse newOrderResponse = client.newOrder(
-                    limitBuy(Konst.symbol, TimeInForce.GTC, info.getCantidad()+"", info.getValor()+""));
+                    limitBuy(AuthData.symbol, TimeInForce.GTC, info.getCantidad()+"", info.getValor()+""));
             logger.info(newOrderResponse);
         } else if ("venta".equals(info.getAccion())) {
             logger.info("vendiendo...");
             NewOrderResponse newOrderResponse = client.newOrder(
-                    limitSell(Konst.symbol, TimeInForce.GTC, info.getCantidad()+"", info.getValor()+""));
+                    limitSell(AuthData.symbol, TimeInForce.GTC, info.getCantidad()+"", info.getValor()+""));
             logger.info(newOrderResponse);
         } else if (info.getValor()==0 && info.getCantidad()==0 && info.getAccion().length()>0) {
             logger.info("cancelando...");
             try {
-                this.client.cancelOrder(new CancelOrderRequest(Konst.symbol, info.getAccion()));
+                this.client.cancelOrder(new CancelOrderRequest(AuthData.symbol, info.getAccion()));
             } catch (BinanceApiException e) {
                 logger.error(e.getError().getMsg());
             }
