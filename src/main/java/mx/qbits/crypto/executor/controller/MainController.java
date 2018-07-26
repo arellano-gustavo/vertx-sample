@@ -4,6 +4,7 @@ import static com.binance.api.client.domain.account.NewOrder.limitBuy;
 import static com.binance.api.client.domain.account.NewOrder.limitSell;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -13,6 +14,7 @@ import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.domain.TimeInForce;
 import com.binance.api.client.domain.account.NewOrderResponse;
 import com.binance.api.client.domain.account.request.CancelOrderRequest;
+import com.binance.api.client.domain.market.AggTrade;
 import com.binance.api.client.exception.BinanceApiException;
 
 import io.vertx.core.AbstractVerticle;
@@ -130,7 +132,29 @@ public class MainController extends AbstractVerticle {
         Operacion info = null;
         info = Json.decodeValue(decoded, Operacion.class);
         logger.info(info.toString());
-
+        double delta = 1.025;
+        List<AggTrade> trades = client.getAggTrades(AuthData.symbol);
+        if(trades.size()>0) {
+            String price = trades.get(0).getPrice();
+            Double dbl = Double.parseDouble(price);
+            if("compra".equals(info.getAccion())) {
+                if(dbl>info.getValor()*delta) {
+                    logger.error("La operación no fue efectuada "
+                            + "debido a que el humbral de compra ("+delta+") fue "
+                            + "exedido. Valor de mercado: "+dbl+". Valor enviado: "+info.getValor()); 
+                }
+                return "{\"error\":true}";
+            }
+            if("venta".equals(info.getAccion())) {
+                if(dbl<info.getValor()/delta) {
+                    logger.error("La operación no fue efectuada "
+                            + "debido a que el humbral de venta ("+delta+") fue "
+                            + "exedido. Valor de mercado: "+dbl+". Valor enviado: "+info.getValor()); 
+                }
+                return "{\"error\":true}";
+            }
+        }
+        
         if("compra".equals(info.getAccion())) {
             logger.info("comprando...");
             NewOrderResponse newOrderResponse = client.newOrder(
